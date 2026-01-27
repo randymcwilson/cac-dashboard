@@ -1,67 +1,320 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>CAC Dashboard</title>
-<style>
-body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#0b1220;color:#fff}
-.wrap{max-width:1100px;margin:0 auto;padding:16px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media(max-width:900px){.grid{grid-template-columns:1fr}}
-.card{background:#fff;color:#111;border-radius:16px;overflow:hidden;box-shadow:0 12px 30px rgba(0,0,0,.25)}
-.card-title{background:#111;color:#fff;font-weight:900;padding:12px;text-align:center}
-.card-body{background:#f5f5f5;padding:12px}
-.kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-.kpi{background:#fff;border:1px solid #d2d2d2;border-radius:12px;padding:10px;text-align:center}
-.kpi-label{font-weight:900;color:#7a1414;font-size:12px;text-transform:uppercase}
-.kpi-value{font-size:20px;font-weight:600}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CAC Dashboard</title>
+
+  <style>
+    :root{
+      --bg:#0b1220;
+      --muted:rgba(255,255,255,0.65);
+      --shadow:0 12px 30px rgba(0,0,0,0.25);
+
+      /* Black / Red theme */
+      --header:#111111;
+      --deep-red:#7a1414;
+      --light:#f5f5f5;
+      --line:#d2d2d2;
+      --text:#111111;
+    }
+
+    *{ box-sizing:border-box; }
+    html{ -webkit-text-size-adjust:100%; }
+    body{
+      margin:0;
+      font-family:"Segoe UI", Arial, sans-serif;
+      background:
+        radial-gradient(1200px 600px at 20% -10%, rgba(122,20,20,0.35), transparent 60%),
+        radial-gradient(900px 500px at 85% 0%, rgba(255,255,255,0.10), transparent 55%),
+        var(--bg);
+      color:#fff;
+    }
+
+    /* Top bar */
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:10;
+      background:linear-gradient(180deg, rgba(17,17,17,0.98), rgba(17,17,17,0.92));
+      border-bottom:1px solid rgba(255,255,255,0.10);
+      backdrop-filter:blur(10px);
+    }
+    .topbar-inner{
+      width:100%;
+      max-width:1100px;
+      margin:0 auto;
+      padding:14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .brand{
+      font-weight:900;
+      letter-spacing:.5px;
+      font-size:clamp(16px, 2.4vw, 20px);
+      white-space:nowrap;
+    }
+    .subtitle{
+      font-size:clamp(12px, 2.0vw, 14px);
+      color:var(--muted);
+      text-align:right;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      max-width:60%;
+    }
+
+    .wrap{
+      width:100%;
+      max-width:1100px;
+      margin:0 auto;
+      padding:16px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+      align-items:start;
+    }
+    @media (max-width: 900px){
+      .grid{ grid-template-columns:1fr; }
+      .subtitle{ max-width:70%; }
+    }
+
+    .card{
+      background:#fff;
+      color:var(--text);
+      border-radius:16px;
+      overflow:hidden;
+      border:1px solid rgba(0,0,0,0.06);
+      box-shadow:var(--shadow);
+    }
+    .card-title{
+      background:var(--header);
+      color:#fff;
+      font-weight:900;
+      letter-spacing:.4px;
+      padding:12px 14px;
+      text-align:center;
+      font-size:clamp(14px, 2.2vw, 18px);
+    }
+    .card-body{
+      background:var(--light);
+      padding:12px;
+    }
+
+    /* KPIs */
+    .kpi-grid-4{
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0, 1fr));
+      gap:10px;
+    }
+    .kpi-grid-2{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0, 1fr));
+      gap:10px;
+      margin-bottom:12px;
+    }
+    @media (max-width: 900px){
+      .kpi-grid-4{ grid-template-columns:repeat(2, minmax(0, 1fr)); } /* 2x2 on mobile */
+    }
+    @media (max-width: 340px){
+      .kpi-grid-4{ grid-template-columns:1fr; }
+    }
+
+    .kpi{
+      text-align:center;
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:10px 8px;
+    }
+    .kpi-label{
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.25px;
+      color:var(--deep-red);
+      line-height:1.1;
+      margin-bottom:6px;
+      font-size:clamp(11px, 2.2vw, 13px);
+      overflow-wrap:anywhere;
+      word-break:break-word;
+    }
+    .kpi-value{
+      font-weight:650;
+      color:var(--text);
+      line-height:1.05;
+      font-size:clamp(15px, 3.2vw, 20px);
+    }
+
+    /* Table */
+    .table{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:14px;
+      overflow:hidden;
+      margin-top:12px;
+    }
+    .thead{
+      display:grid;
+      grid-template-columns:1fr 96px;
+      background:var(--deep-red);
+      color:#fff;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.25px;
+      font-size:12px;
+    }
+    .th, .td{ padding:10px 12px; }
+    .th-right{ text-align:right; }
+
+    .tr{
+      display:grid;
+      grid-template-columns:1fr 96px;
+      border-top:1px solid var(--line);
+      font-size:12.5px;
+      background:#fff;
+    }
+    .tr:nth-child(even){ background:#eeeeee; }
+
+    .td-right{ text-align:right; font-weight:700; }
+    .page{ overflow-wrap:anywhere; word-break:break-word; }
+
+    /* Small status line */
+    .status{
+      margin-top:10px;
+      font-size:12px;
+      color:rgba(255,255,255,0.60);
+      text-align:center;
+    }
+  </style>
 </head>
-  <script>
-const API = "https://script.google.com/macros/s/AKfycbxcKq70FMrtNp1ZuULmbR66leJ44n-8w_JwDdusnJ1dWaj8ZC2hDMf1B_o4N1GuXjSMHQ/exec";
-
-fetch(API)
-  .then(r => r.json())
-  .then(data => {
-    const s = data.social;
-    const w = data.website;
-
-    document.querySelectorAll(".kpi-value")[0].textContent = s.reach;
-    document.querySelectorAll(".kpi-value")[1].textContent = s.engagement;
-    document.querySelectorAll(".kpi-value")[2].textContent = s.newFans;
-    document.querySelectorAll(".kpi-value")[3].textContent = s.totalFans;
-
-    document.querySelectorAll(".kpi-value")[4].textContent = w.visitors;
-    document.querySelectorAll(".kpi-value")[5].textContent = w.pages;
-  });
-</script>
 
 <body>
-<div class="wrap">
-  <div class="grid">
-    <div class="card">
-      <div class="card-title">SOCIAL SNAPSHOT</div>
-      <div class="card-body">
-        <div class="kpi-grid">
-          <div class="kpi"><div class="kpi-label">Reach</div><div class="kpi-value">—</div></div>
-          <div class="kpi"><div class="kpi-label">Engagement</div><div class="kpi-value">—</div></div>
-          <div class="kpi"><div class="kpi-label">New Fans</div><div class="kpi-value">—</div></div>
-          <div class="kpi"><div class="kpi-label">Total Fans</div><div class="kpi-value">—</div></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">WEBSITE SNAPSHOT</div>
-      <div class="card-body">
-        <div class="kpi-grid">
-          <div class="kpi"><div class="kpi-label">Visitors</div><div class="kpi-value">—</div></div>
-          <div class="kpi"><div class="kpi-label">Pages</div><div class="kpi-value">—</div></div>
-        </div>
-      </div>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">CAC DASHBOARD</div>
+      <div class="subtitle" id="subTitle">Loading…</div>
     </div>
   </div>
-</div>
+
+  <div class="wrap">
+    <div class="grid">
+
+      <!-- SOCIAL -->
+      <div class="card">
+        <div class="card-title">SOCIAL SNAPSHOT</div>
+        <div class="card-body">
+          <div class="kpi-grid-4">
+            <div class="kpi"><div class="kpi-label">REACH</div><div class="kpi-value" id="sReach">—</div></div>
+            <div class="kpi"><div class="kpi-label">ENGAGEMENT</div><div class="kpi-value" id="sEngage">—</div></div>
+            <div class="kpi"><div class="kpi-label">NEW FANS</div><div class="kpi-value" id="sNew">—</div></div>
+            <div class="kpi"><div class="kpi-label">TOTAL FANS</div><div class="kpi-value" id="sTotal">—</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WEBSITE -->
+      <div class="card">
+        <div class="card-title">WEBSITE SNAPSHOT</div>
+        <div class="card-body">
+          <div class="kpi-grid-2">
+            <div class="kpi"><div class="kpi-label">VISITORS (YESTERDAY)</div><div class="kpi-value" id="wVisitors">—</div></div>
+            <div class="kpi"><div class="kpi-label">PAGES (YESTERDAY)</div><div class="kpi-value" id="wPages">—</div></div>
+          </div>
+
+          <div class="table">
+            <div class="thead">
+              <div class="th">PAGE</div>
+              <div class="th th-right">VIEWS</div>
+            </div>
+            <div id="topPages">
+              <div class="tr">
+                <div class="td page">Loading…</div>
+                <div class="td td-right">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="status" id="statusLine"></div>
+  </div>
+
+  <script>
+    // ✅ Replace this with your Apps Script /exec URL:
+    const API = "PASTE_YOUR_APPS_SCRIPT_EXEC_URL_HERE";
+
+    fetch(API, { cache: "no-store" })
+      .then(r => {
+        if (!r.ok) throw new Error("API request failed: " + r.status);
+        return r.json();
+      })
+      .then(data => {
+        // SOCIAL
+        const s = data.social || {};
+        setText("sReach",  s.reach);
+        setText("sEngage", s.engagement);
+        setText("sNew",    s.newFans);
+        setText("sTotal",  s.totalFans);
+
+        // WEBSITE KPIs
+        const w = data.website || {};
+        setText("wVisitors", w.visitors);
+        setText("wPages",    w.pages);
+
+        // TOP PAGES
+        const container = document.getElementById("topPages");
+        const rows = (data.pages || []).slice(0, 10);
+
+        if (!rows.length) {
+          container.innerHTML = rowHtml("No page data found.", "—");
+        } else {
+          container.innerHTML = rows.map(([page, views]) => rowHtml(page, views)).join("");
+        }
+
+        // Status line
+        const now = new Date();
+        const stamp = now.toLocaleString();
+        document.getElementById("subTitle").textContent = "Live data • " + stamp;
+        document.getElementById("statusLine").textContent = "Tip: Bookmark this page on mobile for quick access.";
+      })
+      .catch(err => {
+        console.error(err);
+        document.getElementById("subTitle").textContent = "Error loading data";
+        document.getElementById("statusLine").textContent = String(err.message || err);
+        const container = document.getElementById("topPages");
+        if (container) container.innerHTML = rowHtml("Error loading top pages.", "—");
+      });
+
+    function setText(id, val){
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = (val === undefined || val === null || String(val).trim() === "") ? "—" : String(val);
+    }
+
+    function rowHtml(page, views){
+      return `
+        <div class="tr">
+          <div class="td page">${escapeHtml(page)}</div>
+          <div class="td td-right">${escapeHtml(views)}</div>
+        </div>
+      `;
+    }
+
+    function escapeHtml(str){
+      return String(str ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+    }
+  </script>
 </body>
 </html>
