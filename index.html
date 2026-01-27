@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CAC Dashboard</title>
+<style>
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#0b1220;color:#fff}
+.wrap{max-width:1100px;margin:0 auto;padding:16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.card{background:#fff;color:#111;border-radius:16px;overflow:hidden;box-shadow:0 12px 30px rgba(0,0,0,.25)}
+.card-title{background:#111;color:#fff;font-weight:900;padding:12px;text-align:center}
+.card-body{background:#f5f5f5;padding:12px}
+.kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.kpi{background:#fff;border:1px solid #d2d2d2;border-radius:12px;padding:10px;text-align:center}
+.kpi-label{font-weight:900;color:#7a1414;font-size:12px;text-transform:uppercase}
+.kpi-value{font-size:20px;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="grid">
+    <div class="card">
+      <div class="card-title">SOCIAL SNAPSHOT</div>
+      <div class="card-body">
+        <div class="kpi-grid">
+          <div class="kpi"><div class="kpi-label">Reach</div><div class="kpi-value">—</div></div>
+          <div class="kpi"><div class="kpi-label">Engagement</div><div class="kpi-value">—</div></div>
+          <div class="kpi"><div class="kpi-label">New Fans</div><div class="kpi-value">—</div></div>
+          <div class="kpi"><div class="kpi-label">Total Fans</div><div class="kpi-value">—</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">WEBSITE SNAPSHOT</div>
+      <div class="card-body">
+        <div class="kpi-grid">
+          <div class="kpi"><div class="kpi-label">Visitors</div><div class="kpi-value">—</div></div>
+          <div class="kpi"><div class="kpi-label">Pages</div><div class="kpi-value">—</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
