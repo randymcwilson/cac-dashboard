@@ -221,9 +221,12 @@
       <div class="card">
         <div class="card-title">WEBSITE SNAPSHOT</div>
         <div class="card-body">
-          <div class="kpi-grid-2">
+          <!-- changed from kpi-grid-2 to kpi-grid-4 and added 2 KPIs -->
+          <div class="kpi-grid-4">
             <div class="kpi"><div class="kpi-label">VISITORS (YESTERDAY)</div><div class="kpi-value" id="wVisitors">—</div></div>
             <div class="kpi"><div class="kpi-label">PAGES (YESTERDAY)</div><div class="kpi-value" id="wPages">—</div></div>
+            <div class="kpi"><div class="kpi-label">QUOTE STARTS (YESTERDAY)</div><div class="kpi-value" id="qStarts">—</div></div>
+            <div class="kpi"><div class="kpi-label">QUOTE SUBMITS (YESTERDAY)</div><div class="kpi-value" id="qSubmits">—</div></div>
           </div>
 
           <div class="table">
@@ -247,8 +250,8 @@
   </div>
 
   <script>
-    // ✅ Replace this with your Apps Script /exec URL:
-    const API = "https://script.google.com/macros/s/AKfycbxcKq70FMrtNp1ZuULmbR66leJ44n-8w_JwDdusnJ1dWaj8ZC2hDMf1B_o4N1GuXjSMHQ/exec";
+    // ✅ Updated Apps Script /exec URL:
+    const API = "https://script.google.com/macros/s/AKfycbxtkTFOEHxtHZvPD9oquj5E9QeaFRbngGAw5aD6PY9lQn1XGeMRr_nWacrUXD-js5B4/exec";
 
     fetch(API, { cache: "no-store" })
       .then(r => {
@@ -267,6 +270,10 @@
         const w = data.website || {};
         setText("wVisitors", w.visitors);
         setText("wPages",    w.pages);
+
+        // NEW: Quote funnel
+        setText("qStarts",  w.quoteStartsYesterday);
+        setText("qSubmits", w.quoteSubmitsYesterday);
 
         // TOP PAGES
         const container = document.getElementById("topPages");
