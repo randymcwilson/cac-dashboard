@@ -36,6 +36,7 @@
       color:#fff;
     }
 
+    /* Top bar */
     .topbar{
       position:sticky;
       top:0;
@@ -58,12 +59,21 @@
       font-weight:900;
       letter-spacing:.5px;
       font-size:clamp(16px, 2.4vw, 20px);
-    }
-    .subtitle{
-      font-size:clamp(12px, 2.0vw, 14px);
-      color:var(--muted);
-      text-align:right;
       white-space:nowrap;
+    }
+
+    /* NEW: logo in the top bar (right side) */
+    .top-logo{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      min-width:120px;
+    }
+    .top-logo img{
+      height:28px;           /* adjust if you want bigger/smaller */
+      width:auto;
+      display:block;
+      filter: drop-shadow(0 2px 8px rgba(0,0,0,0.35));
     }
 
     .wrap{
@@ -77,9 +87,12 @@
       display:grid;
       grid-template-columns:1fr 1fr;
       gap:14px;
+      align-items:start;
     }
-    @media (max-width:900px){
+    @media (max-width: 900px){
       .grid{ grid-template-columns:1fr; }
+      .top-logo{ min-width:90px; }
+      .top-logo img{ height:24px; }
     }
 
     .card{
@@ -94,26 +107,27 @@
       background:var(--header);
       color:#fff;
       font-weight:900;
-      padding:12px;
+      letter-spacing:.4px;
+      padding:12px 14px;
       text-align:center;
+      font-size:clamp(14px, 2.2vw, 18px);
     }
     .card-body{
       background:var(--light);
       padding:12px;
     }
 
-    /* Social styling */
-    .social-title{ background:var(--fb-blue); }
-    .social-body{ background:var(--fb-light); }
-    .social-body .kpi-label{ color:var(--fb-dark); }
-
+    /* KPIs */
     .kpi-grid-4{
       display:grid;
-      grid-template-columns:repeat(4, 1fr);
+      grid-template-columns:repeat(4, minmax(0, 1fr));
       gap:10px;
     }
-    @media (max-width:900px){
-      .kpi-grid-4{ grid-template-columns:repeat(2,1fr); }
+    @media (max-width: 900px){
+      .kpi-grid-4{ grid-template-columns:repeat(2, minmax(0, 1fr)); } /* 2x2 on mobile */
+    }
+    @media (max-width: 340px){
+      .kpi-grid-4{ grid-template-columns:1fr; }
     }
 
     .kpi{
@@ -121,49 +135,70 @@
       background:#fff;
       border:1px solid var(--line);
       border-radius:14px;
-      padding:10px;
+      padding:10px 8px;
     }
     .kpi-label{
       font-weight:900;
       text-transform:uppercase;
+      letter-spacing:.25px;
       color:var(--deep-red);
+      line-height:1.1;
       margin-bottom:6px;
-      font-size:12px;
+      font-size:clamp(11px, 2.2vw, 13px);
+      overflow-wrap:anywhere;
+      word-break:break-word;
     }
     .kpi-value{
-      font-weight:700;
-      font-size:18px;
+      font-weight:650;
+      color:var(--text);
+      line-height:1.05;
+      font-size:clamp(15px, 3.2vw, 20px);
     }
 
+    /* Social Facebook styling */
+    .social-title{ background:var(--fb-blue); color:#fff; }
+    .social-body{ background:var(--fb-light); }
+    .social-body .kpi-label{ color:var(--fb-dark); }
+
+    /* Table */
     .table{
-      margin-top:12px;
+      background:#fff;
       border:1px solid var(--line);
       border-radius:14px;
       overflow:hidden;
+      margin-top:12px;
     }
     .thead{
       display:grid;
-      grid-template-columns:1fr 90px;
+      grid-template-columns:1fr 96px;
       background:var(--deep-red);
       color:#fff;
       font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.25px;
       font-size:12px;
     }
-    .th, .td{ padding:10px; }
+    .th, .td{ padding:10px 12px; }
+    .th-right{ text-align:right; }
+
     .tr{
       display:grid;
-      grid-template-columns:1fr 90px;
+      grid-template-columns:1fr 96px;
       border-top:1px solid var(--line);
-      font-size:13px;
+      font-size:12.5px;
+      background:#fff;
     }
-    .tr:nth-child(even){ background:#eee; }
-    .td-right{ text-align:right; font-weight:700; }
+    .tr:nth-child(even){ background:#eeeeee; }
 
+    .td-right{ text-align:right; font-weight:700; }
+    .page{ overflow-wrap:anywhere; word-break:break-word; }
+
+    /* Small status line */
     .status{
       margin-top:10px;
       font-size:12px;
+      color:rgba(255,255,255,0.60);
       text-align:center;
-      color:rgba(255,255,255,0.6);
     }
   </style>
 </head>
@@ -172,7 +207,11 @@
   <div class="topbar">
     <div class="topbar-inner">
       <div class="brand">CAC DASHBOARD</div>
-      <div class="subtitle" id="subTitle">Loading…</div>
+
+      <!-- NEW: logo replaces the "Live data..." text -->
+      <div class="top-logo" aria-label="Cape Air Charter logo">
+        <img src="cac-logo.png" alt="Cape Air Charter" />
+      </div>
     </div>
   </div>
 
@@ -199,55 +238,68 @@
           <div class="kpi-grid-4">
             <div class="kpi"><div class="kpi-label">VISITORS (YESTERDAY)</div><div class="kpi-value" id="wVisitors">—</div></div>
             <div class="kpi"><div class="kpi-label">PAGES (YESTERDAY)</div><div class="kpi-value" id="wPages">—</div></div>
-            <div class="kpi"><div class="kpi-label">QUOTE STARTS</div><div class="kpi-value" id="qStarts">—</div></div>
-            <div class="kpi"><div class="kpi-label">QUOTE SUBMITS</div><div class="kpi-value" id="qSubmits">—</div></div>
+            <div class="kpi"><div class="kpi-label">QUOTE STARTS (YESTERDAY)</div><div class="kpi-value" id="qStarts">—</div></div>
+            <div class="kpi"><div class="kpi-label">QUOTE SUBMITS (YESTERDAY)</div><div class="kpi-value" id="qSubmits">—</div></div>
           </div>
 
           <div class="table">
             <div class="thead">
               <div class="th">PAGE</div>
-              <div class="th">VIEWS</div>
+              <div class="th th-right">VIEWS</div>
             </div>
-            <div id="topPages"></div>
+            <div id="topPages">
+              <div class="tr">
+                <div class="td page">Loading…</div>
+                <div class="td td-right">—</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
     </div>
+
     <div class="status" id="statusLine"></div>
   </div>
 
   <script>
     const API = "https://script.google.com/macros/s/AKfycbxtkTFOEHxtHZvPD9oquj5E9QeaFRbngGAw5aD6PY9lQn1XGeMRr_nWacrUXD-js5B4/exec";
 
-    fetch(API,{cache:"no-store"})
-      .then(r=>r.json())
-      .then(data=>{
-        const s=data.social||{};
-        setText("sReach",s.reach);
-        setText("sEngage",s.engagement);
-        setText("sNew",s.newFans);
-        setText("sTotal",s.totalFans);
+    fetch(API, { cache: "no-store" })
+      .then(r => {
+        if (!r.ok) throw new Error("API request failed: " + r.status);
+        return r.json();
+      })
+      .then(data => {
+        // SOCIAL
+        const s = data.social || {};
+        setText("sReach",  s.reach);
+        setText("sEngage", s.engagement);
+        setText("sNew",    s.newFans);
+        setText("sTotal",  s.totalFans);
 
-        const w=data.website||{};
-        setText("wVisitors",w.visitors);
-        setText("wPages",w.pages);
-        setText("qStarts",w.quoteStartsYesterday);
-        setText("qSubmits",w.quoteSubmitsYesterday);
+        // WEBSITE KPIs
+        const w = data.website || {};
+        setText("wVisitors", w.visitors);
+        setText("wPages",    w.pages);
+        setText("qStarts",   w.quoteStartsYesterday);
+        setText("qSubmits",  w.quoteSubmitsYesterday);
 
-        const container=document.getElementById("topPages");
-        container.innerHTML=(data.pages||[]).slice(0,10).map(([p,v])=>
-          `<div class="tr"><div class="td">${p}</div><div class="td td-right">${v}</div></div>`
-        ).join("");
+        // TOP PAGES
+        const container = document.getElementById("topPages");
+        const rows = (data.pages || []).slice(0, 10);
 
-        document.getElementById("subTitle").textContent="Live data • "+new Date().toLocaleString();
-        document.getElementById("statusLine").textContent="Tip: Bookmark this page on mobile for quick access.";
-      });
+        if (!rows.length) {
+          container.innerHTML = rowHtml("No page data found.", "—");
+        } else {
+          container.innerHTML = rows.map(([page, views]) => rowHtml(page, views)).join("");
+        }
 
-    function setText(id,val){
-      document.getElementById(id).textContent=val||"—";
-    }
-  </script>
-</body>
-</html>
-```
+        // Bottom status line (optional)
+        document.getElementById("statusLine").textContent = "Tip: Bookmark this page on mobile for quick access.";
+      })
+      .catch(err => {
+        console.error(err);
+        document.getElementById("statusLine").textContent = String(err.message || err);
+        const container = document.getElementById("topPages");
+        if (container) container.innerHTML = rowHtml("
