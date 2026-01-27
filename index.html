@@ -18,6 +18,25 @@ body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#0b1220;color:#ff
 .kpi-value{font-size:20px;font-weight:600}
 </style>
 </head>
+  <script>
+const API = "https://script.google.com/macros/s/AKfycbxcKq70FMrtNp1ZuULmbR66leJ44n-8w_JwDdusnJ1dWaj8ZC2hDMf1B_o4N1GuXjSMHQ/exec";
+
+fetch(API)
+  .then(r => r.json())
+  .then(data => {
+    const s = data.social;
+    const w = data.website;
+
+    document.querySelectorAll(".kpi-value")[0].textContent = s.reach;
+    document.querySelectorAll(".kpi-value")[1].textContent = s.engagement;
+    document.querySelectorAll(".kpi-value")[2].textContent = s.newFans;
+    document.querySelectorAll(".kpi-value")[3].textContent = s.totalFans;
+
+    document.querySelectorAll(".kpi-value")[4].textContent = w.visitors;
+    document.querySelectorAll(".kpi-value")[5].textContent = w.pages;
+  });
+</script>
+
 <body>
 <div class="wrap">
   <div class="grid">
