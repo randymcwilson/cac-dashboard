@@ -62,7 +62,7 @@
       white-space:nowrap;
     }
 
-    /* NEW: logo in the top bar (right side) */
+    /* Logo */
     .top-logo{
       display:flex;
       align-items:center;
@@ -70,10 +70,14 @@
       min-width:120px;
     }
     .top-logo img{
-      height:28px;           /* adjust if you want bigger/smaller */
+      height:28px;
       width:auto;
       display:block;
       filter: drop-shadow(0 2px 8px rgba(0,0,0,0.35));
+    }
+    @media (max-width: 900px){
+      .top-logo{ min-width:90px; }
+      .top-logo img{ height:24px; }
     }
 
     .wrap{
@@ -91,8 +95,6 @@
     }
     @media (max-width: 900px){
       .grid{ grid-template-columns:1fr; }
-      .top-logo{ min-width:90px; }
-      .top-logo img{ height:24px; }
     }
 
     .card{
@@ -124,7 +126,7 @@
       gap:10px;
     }
     @media (max-width: 900px){
-      .kpi-grid-4{ grid-template-columns:repeat(2, minmax(0, 1fr)); } /* 2x2 on mobile */
+      .kpi-grid-4{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
     }
     @media (max-width: 340px){
       .kpi-grid-4{ grid-template-columns:1fr; }
@@ -207,8 +209,6 @@
   <div class="topbar">
     <div class="topbar-inner">
       <div class="brand">CAC DASHBOARD</div>
-
-      <!-- NEW: logo replaces the "Live data..." text -->
       <div class="top-logo" aria-label="Cape Air Charter logo">
         <img src="cac-logo.png" alt="Cape Air Charter" />
       </div>
@@ -295,11 +295,40 @@
           container.innerHTML = rows.map(([page, views]) => rowHtml(page, views)).join("");
         }
 
-        // Bottom status line (optional)
-        document.getElementById("statusLine").textContent = "Tip: Bookmark this page on mobile for quick access.";
+        // Bottom status line
+        document.getElementById("statusLine").textContent =
+          "Tip: Bookmark this page on mobile for quick access.";
       })
       .catch(err => {
         console.error(err);
         document.getElementById("statusLine").textContent = String(err.message || err);
         const container = document.getElementById("topPages");
-        if (container) container.innerHTML = rowHtml("
+        if (container) container.innerHTML = rowHtml("Error loading top pages.", "—");
+      });
+
+    function setText(id, val){
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = (val === undefined || val === null || String(val).trim() === "") ? "—" : String(val);
+    }
+
+    function rowHtml(page, views){
+      return `
+        <div class="tr">
+          <div class="td page">${escapeHtml(page)}</div>
+          <div class="td td-right">${escapeHtml(views)}</div>
+        </div>
+      `;
+    }
+
+    function escapeHtml(str){
+      return String(str ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+    }
+  </script>
+</body>
+</html>
