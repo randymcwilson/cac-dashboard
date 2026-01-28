@@ -92,7 +92,7 @@
     .kpi-label{ font-weight:900; text-transform:uppercase; color:var(--deep-red); font-size:12px;}
     .kpi-value{ font-weight:700; font-size:18px;}
 
-    /* NEW: Trend arrow styling */
+    /* Trend arrow styling */
     .trend{
       margin-left:8px;
       font-size:12px;
@@ -159,7 +159,14 @@
               </div>
             </div>
 
-            <div class="kpi"><div class="kpi-label">Total Fans</div><div class="kpi-value" id="sTotal">—</div></div>
+            <!-- UPDATED: Total Fans now includes trend -->
+            <div class="kpi">
+              <div class="kpi-label">Total Fans</div>
+              <div class="kpi-value">
+                <span id="sTotal">—</span><span class="trend" id="sTotalTrend"></span>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -207,17 +214,35 @@
       .then(r=>r.json())
       .then(data=>{
         const s=data.social||{};
-        set("sReach",s.reach); set("sEngage",s.engagement); set("sNew",s.newFans); set("sTotal",s.totalFans);
+        set("sReach",s.reach);
+        set("sEngage",s.engagement);
+        set("sNew",s.newFans);
+        set("sTotal",s.totalFans);
 
-        // NEW: 14-day trends (last 7 vs previous 7)
+        // 14-day trends (last 7 vs previous 7)
         const s14 = data.social14 || {};
         setTrend("sReachTrend", s14.reachTrend);
         setTrend("sEngageTrend", s14.engagementTrend);
         setTrend("sNewTrend", s14.newFollowersTrend);
 
+        // UPDATED: Total Fans trend support
+        // Accepts any of these keys (so you don't have to re-edit HTML later):
+        // - social14.totalFansTrend
+        // - social14.followersTrend
+        // - social14.totalFollowersTrend
+        const totalTrend =
+          s14.totalFansTrend ||
+          s14.totalFollowersTrend ||
+          s14.followersTrend ||
+          null;
+
+        setTrend("sTotalTrend", totalTrend);
+
         const w=data.website||{};
-        set("wVisitors",w.visitors); set("wPages",w.pages);
-        set("qStarts",w.quoteStartsYesterday); set("qSubmits",w.quoteSubmitsYesterday);
+        set("wVisitors",w.visitors);
+        set("wPages",w.pages);
+        set("qStarts",w.quoteStartsYesterday);
+        set("qSubmits",w.quoteSubmitsYesterday);
 
         const container=document.getElementById("topPages");
         container.innerHTML=(data.pages||[]).slice(0,10).map(([p,v])=>`<div class="tr"><div class="td">${p}</div><div class="td td-right">${v}</div></div>`).join("");
@@ -229,14 +254,17 @@
         document.getElementById("statusLine").textContent="Tip: Bookmark this page on mobile for quick access.";
       });
 
-    function set(id,val){document.getElementById(id).textContent=val||"—";}
+    function set(id,val){
+      document.getElementById(id).textContent = (val===0 ? "0" : (val||"—"));
+    }
 
-    // NEW: colored arrow trend display (one decimal %)
+    // Colored arrow trend display (one decimal %)
+    // Expects object like: { dir:"up"|"down", arrow:"▲"|"▼", pct: number|null }
     function setTrend(id, t){
       const el = document.getElementById(id);
       if (!el) return;
 
-      if (!t) { el.textContent = ""; return; }
+      if (!t) { el.textContent = ""; el.classList.remove("up","down"); return; }
 
       el.classList.remove("up","down");
       el.classList.add(t.dir === "down" ? "down" : "up");
