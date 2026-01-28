@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -239,7 +238,7 @@
         const container=document.getElementById("topPages");
         container.innerHTML=(data.pages||[]).slice(0,10).map(([p,v])=>`<div class="tr"><div class="td">${p}</div><div class="td td-right">${v}</div></div>`).join("");
 
-        document.getElementById("statusLine").textContent="Tip: Bookmark this page on mobile for quick access.";
+        document.getElementById("statusLine").textContent="";
       })
       .catch(()=>{});
 
