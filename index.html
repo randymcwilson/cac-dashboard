@@ -22,6 +22,10 @@
 
       --gbp-dark:#0f5d2f;
       --gbp-light:#e7f6ea;
+
+      --gsc-purple:#6a1b9a;
+      --gsc-light:#f3e5f5;
+      --gsc-dark:#4a148c;
     }
 
     *{ box-sizing:border-box; }
@@ -40,6 +44,7 @@
       top:0;
       background:#111;
       border-bottom:1px solid rgba(255,255,255,0.1);
+      z-index:10;
     }
     .topbar-inner{
       max-width:1100px;
@@ -76,6 +81,10 @@
     .social-title{ background:var(--fb-blue); }
     .social-body{ background:var(--fb-light); }
     .social-body .kpi-label{ color:var(--fb-dark); }
+
+    .gsc-title{ background:var(--gsc-purple); }
+    .gsc-body{ background:var(--gsc-light); }
+    .gsc-body .kpi-label{ color:var(--gsc-dark); }
 
     .card-body{ padding:12px; }
 
@@ -159,7 +168,6 @@
               </div>
             </div>
 
-            <!-- UPDATED: Total Fans includes trend -->
             <div class="kpi">
               <div class="kpi-label">Total Fans</div>
               <div class="kpi-value">
@@ -170,7 +178,7 @@
         </div>
       </div>
 
-      <!-- WEBSITE -->
+      <!-- WEBSITE + GBP + TOP PAGES -->
       <div class="card">
         <div class="card-title">WEBSITE SNAPSHOT</div>
         <div class="card-body">
@@ -193,12 +201,52 @@
             <div class="gbp-body">
               ⭐ Rating: <strong id="gbpRating">—</strong><br>
               📝 Reviews: <strong id="gbpReviews">—</strong><br>
-              <a href="https://www.google.com/search?q=Cape+Air+Charter&stick=H4sIAAAAAAAA_-NgU1I1qLCwMDe3MLcwSTY0sUgyTzW2MqiwNEw2MUtMMjVOTDVMTjY0XMQq4JxYkKrgmFmk4JyRWFSSWgQAS78qLjwAAAA&hl=en&mat=CVrbmtdbyNKmElcBTVDHnrvUYxeX-Aw73h6ceEwGVImLLVIt_-DTrgBR9VeCWCA7dUJoj5DOR6SV1RIOU32BpUZysvfAsH1t80z4eKHVI2QEmRRio0VzoiJ0U-2StlxqiOs&authuser=0&safe=active&ssui=on" target="_blank" style="font-size:12px;font-weight:700;color:#0f5d2f;text-decoration:none;">
+              <a href="https://www.google.com/search?q=Cape+Air+Charter&hl=en" target="_blank" style="font-size:12px;font-weight:700;color:#0f5d2f;text-decoration:none;">
                 LINK TO GBP
               </a>
             </div>
           </div>
 
+        </div>
+      </div>
+
+      <!-- SEARCH CONSOLE (GSC) -->
+      <div class="card">
+        <div class="card-title gsc-title">SEARCH SNAPSHOT (GOOGLE)</div>
+        <div class="card-body gsc-body">
+          <div class="kpi-grid-4">
+            <div class="kpi">
+              <div class="kpi-label">Impressions</div>
+              <div class="kpi-value">
+                <span id="gImpr">—</span><span class="trend" id="gImprTrend"></span>
+              </div>
+            </div>
+
+            <div class="kpi">
+              <div class="kpi-label">Clicks</div>
+              <div class="kpi-value">
+                <span id="gClicks">—</span><span class="trend" id="gClicksTrend"></span>
+              </div>
+            </div>
+
+            <div class="kpi">
+              <div class="kpi-label">CTR</div>
+              <div class="kpi-value">
+                <span id="gCtr">—</span><span class="trend" id="gCtrTrend"></span>
+              </div>
+            </div>
+
+            <div class="kpi">
+              <div class="kpi-label">Avg Position</div>
+              <div class="kpi-value">
+                <span id="gPos">—</span><span class="trend" id="gPosTrend"></span>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:10px;text-align:center;font-size:12px;color:rgba(0,0,0,0.65);font-weight:700;">
+            Window: <span id="gWindow">—</span>
+          </div>
         </div>
       </div>
 
@@ -210,13 +258,13 @@
     // SOCIAL endpoint (Coupler + followers_14d trend pack)
     const API_SOCIAL="https://script.google.com/macros/s/AKfycbwx0XOZX-M8b_tsBzOTeTqpUi8aqF5n2VdKWnjQOSqz6g9cHouiAmSOaCf8yxv8q4oK4g/exec";
 
-    // GA4 Automated Dashboard endpoint (Visitors/Pages + Quote Starts/Submits + GBP)
-    const API_GA4_GBP="https://script.google.com/macros/s/AKfycbw-jr6foDWsUoc2gF9p5HMitLAVEhLWp4iUc25Qa6-WnQ-yYHoeryB1I-UyiQOaSBY/exec";
+    // UNIFIED endpoint (Website + Pages + GBP + Search Console)
+    const API_UNIFIED="https://script.google.com/macros/s/AKfycbw-jr6foDWsUoc2gF9p5HMitLAVEhLWp4iUc25Qa6-WnQ-yYHoeryB1I-UyiQOaSBY/exec";
 
-    // 1) SOCIAL + TOP PAGES (from the social script)
+    // 1) SOCIAL (from the social script) + renders TOP PAGES from that endpoint
     fetch(API_SOCIAL,{cache:"no-store"})
-      .then(r=>r.json())
-      .then(data=>{
+      .then(function(r){ return r.json(); })
+      .then(function(data){
         const s=data.social||{};
         set("sReach",s.reach);
         set("sEngage",s.engagement);
@@ -236,32 +284,56 @@
         setTrend("sTotalTrend", totalTrend);
 
         const container=document.getElementById("topPages");
-        container.innerHTML=(data.pages||[]).slice(0,10).map(([p,v])=>`<div class="tr"><div class="td">${p}</div><div class="td td-right">${v}</div></div>`).join("");
+        container.innerHTML=(data.pages||[]).slice(0,10).map(function(row){
+          const p=row[0], v=row[1];
+          return '<div class="tr"><div class="td">'+escapeHtml(p)+'</div><div class="td td-right">'+escapeHtml(v)+'</div></div>';
+        }).join("");
 
         document.getElementById("statusLine").textContent="";
       })
-      .catch(()=>{});
+      .catch(function(){});
 
-    // 2) GA4 + GBP + Quote events (from your GA4 script)
-    fetch(API_GA4_GBP,{cache:"no-store"})
-      .then(r=>r.json())
-      .then(data=>{
+    // 2) UNIFIED (Website + GBP + Search Console)
+    fetch(API_UNIFIED,{cache:"no-store"})
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        // WEBSITE
         const w=data.website||{};
         set("wVisitors", w.visitors);
         set("wPages", w.pages);
+        set("qStarts", w.quoteStartsYesterday);
+        set("qSubmits", w.quoteSubmitsYesterday);
 
-        // accept several possible key names so minor script changes won't break the UI
-        set("qStarts", w.quoteStartsYesterday ?? w.quoteStarts ?? w.qStarts ?? w.charterFormStarts ?? w.formStarts ?? null);
-        set("qSubmits", w.quoteSubmitsYesterday ?? w.quoteSubmits ?? w.qSubmits ?? w.charterQuoteSubmits ?? w.formSubmits ?? null);
-
+        // GBP
         const g=data.gbp||{};
-        set("gbpRating", g.rating ?? g.avgRating ?? g.stars ?? null);
-        set("gbpReviews", g.reviews ?? g.reviewCount ?? null);
+        set("gbpRating", g.rating);
+        set("gbpReviews", g.reviews);
+
+        // SEARCH CONSOLE
+        const sc=data.search||{};
+        set("gImpr", formatNum(sc.impressions));
+        set("gClicks", formatNum(sc.clicks));
+        set("gCtr", (sc.ctrPct==null ? "—" : (sc.ctrPct + "%")));
+        set("gPos", (sc.position==null ? "—" : String(sc.position)));
+        set("gWindow", sc.windowCurrent || "—");
+
+        setTrend("gImprTrend", sc.impressionsTrend);
+        setTrend("gClicksTrend", sc.clicksTrend);
+        setTrend("gCtrTrend", sc.ctrTrend);
+        setTrend("gPosTrend", sc.positionTrend);
       })
-      .catch(()=>{});
+      .catch(function(){});
 
     function set(id,val){
-      document.getElementById(id).textContent = (val===0 ? "0" : (val||"—"));
+      const el=document.getElementById(id);
+      if (!el) return;
+      el.textContent = (val===0 ? "0" : (val||"—"));
+    }
+
+    function formatNum(x){
+      const n = Number(x);
+      if (!isFinite(n)) return (x===0 ? "0" : (x||"—"));
+      return n.toLocaleString();
     }
 
     // colored arrow trend display (one decimal %)
@@ -275,13 +347,22 @@
       el.classList.add(t.dir === "down" ? "down" : "up");
 
       if (t.pct === null || t.pct === undefined) {
-        el.textContent = ` ${t.arrow} NEW`;
+        el.textContent = " " + (t.arrow || "") + " NEW";
         return;
       }
 
       const pctNum = Number(t.pct);
       const sign = (pctNum >= 0) ? "+" : "";
-      el.textContent = ` ${t.arrow} ${sign}${pctNum.toFixed(1)}%`;
+      el.textContent = " " + (t.arrow || "") + " " + sign + pctNum.toFixed(1) + "%";
+    }
+
+    function escapeHtml(s){
+      return String(s==null ? "" : s)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
     }
   </script>
 </body>
