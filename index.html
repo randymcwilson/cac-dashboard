@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -159,14 +160,13 @@
               </div>
             </div>
 
-            <!-- UPDATED: Total Fans now includes trend -->
+            <!-- UPDATED: Total Fans includes trend -->
             <div class="kpi">
               <div class="kpi-label">Total Fans</div>
               <div class="kpi-value">
                 <span id="sTotal">—</span><span class="trend" id="sTotalTrend"></span>
               </div>
             </div>
-
           </div>
         </div>
       </div>
@@ -208,9 +208,14 @@
   </div>
 
   <script>
-    const API="https://script.google.com/macros/s/AKfycbw0EIsymmb4Nq7u0ryfPs3eifdeZtai0FCagKKqn_ZhnIajXFyZFg_HkpHjqi3Rc1AHpA/exec";
+    // SOCIAL endpoint (Coupler + followers_14d trend pack)
+    const API_SOCIAL="https://script.google.com/macros/s/AKfycbw0EIsymmb4Nq7u0ryfPs3eifdeZtai0FCagKKqn_ZhnIajXFyZFg_HkpHjqi3Rc1AHpA/exec";
 
-    fetch(API,{cache:"no-store"})
+    // GA4 Automated Dashboard endpoint (Visitors/Pages + Quote Starts/Submits + GBP)
+    const API_GA4_GBP="https://script.google.com/macros/s/AKfycbywluw96nxs9daq6RkHf-6vu43PJq1nM7rF2PxpwH42BfnyStu-wSqzYnhRooUPi1oF/exec";
+
+    // 1) SOCIAL + TOP PAGES (from the social script)
+    fetch(API_SOCIAL,{cache:"no-store"})
       .then(r=>r.json())
       .then(data=>{
         const s=data.social||{};
@@ -219,47 +224,48 @@
         set("sNew",s.newFans);
         set("sTotal",s.totalFans);
 
-        // 14-day trends (last 7 vs previous 7)
         const s14 = data.social14 || {};
         setTrend("sReachTrend", s14.reachTrend);
         setTrend("sEngageTrend", s14.engagementTrend);
         setTrend("sNewTrend", s14.newFollowersTrend);
 
-        // UPDATED: Total Fans trend support
-        // Accepts any of these keys (so you don't have to re-edit HTML later):
-        // - social14.totalFansTrend
-        // - social14.followersTrend
-        // - social14.totalFollowersTrend
         const totalTrend =
           s14.totalFansTrend ||
           s14.totalFollowersTrend ||
           s14.followersTrend ||
           null;
-
         setTrend("sTotalTrend", totalTrend);
-
-        const w=data.website||{};
-        set("wVisitors",w.visitors);
-        set("wPages",w.pages);
-        set("qStarts",w.quoteStartsYesterday);
-        set("qSubmits",w.quoteSubmitsYesterday);
 
         const container=document.getElementById("topPages");
         container.innerHTML=(data.pages||[]).slice(0,10).map(([p,v])=>`<div class="tr"><div class="td">${p}</div><div class="td td-right">${v}</div></div>`).join("");
 
-        const g=data.gbp||{};
-        set("gbpRating",g.rating);
-        set("gbpReviews",g.reviews);
-
         document.getElementById("statusLine").textContent="Tip: Bookmark this page on mobile for quick access.";
-      });
+      })
+      .catch(()=>{});
+
+    // 2) GA4 + GBP + Quote events (from your GA4 script)
+    fetch(API_GA4_GBP,{cache:"no-store"})
+      .then(r=>r.json())
+      .then(data=>{
+        const w=data.website||{};
+        set("wVisitors", w.visitors);
+        set("wPages", w.pages);
+
+        // accept several possible key names so minor script changes won't break the UI
+        set("qStarts", w.quoteStartsYesterday ?? w.quoteStarts ?? w.qStarts ?? w.charterFormStarts ?? w.formStarts ?? null);
+        set("qSubmits", w.quoteSubmitsYesterday ?? w.quoteSubmits ?? w.qSubmits ?? w.charterQuoteSubmits ?? w.formSubmits ?? null);
+
+        const g=data.gbp||{};
+        set("gbpRating", g.rating ?? g.avgRating ?? g.stars ?? null);
+        set("gbpReviews", g.reviews ?? g.reviewCount ?? null);
+      })
+      .catch(()=>{});
 
     function set(id,val){
       document.getElementById(id).textContent = (val===0 ? "0" : (val||"—"));
     }
 
-    // Colored arrow trend display (one decimal %)
-    // Expects object like: { dir:"up"|"down", arrow:"▲"|"▼", pct: number|null }
+    // colored arrow trend display (one decimal %)
     function setTrend(id, t){
       const el = document.getElementById(id);
       if (!el) return;
@@ -281,3 +287,4 @@
   </script>
 </body>
 </html>
+```
